@@ -96,38 +96,33 @@ export default function AdminPage() {
   }
 
   async function resetRoom(aksi: AksiReset) {
-    if (!kodeRoom.trim()) {
-      setPesan('Isi kode room dulu');
-      return;
-    }
     const konfirmasi =
       aksi === 'score'
-        ? `Reset skor semua pemain di room ${kodeRoom}?`
+        ? 'Reset skor semua pemain di semua room?'
         : aksi === 'clear'
-          ? `Hapus SEMUA pemain di room ${kodeRoom}?`
-          : `Hapus room ${kodeRoom} beserta seluruh datanya?`;
+          ? 'Hapus SEMUA pemain + log event di semua room?'
+          : 'Hapus semua room beserta seluruh datanya?';
     if (!window.confirm(konfirmasi)) return;
     setSibuk(true);
     setPesan(null);
     try {
-      const res = await fetch(`/api/admin/rooms/${kodeRoom}/reset`, {
+      const res = await fetch('/api/admin/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: aksi }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setPesan(body.error ?? 'reset gagal');
+        setPesan(body.error ?? 'aksi gagal');
         return;
       }
       tunjukToast(
         aksi === 'score'
-          ? `Skor room ${kodeRoom} direset ke 0.`
+          ? 'Skor semua pemain direset ke 0.'
           : aksi === 'clear'
-            ? `Semua pemain room ${kodeRoom} dihapus.`
-            : `Room ${kodeRoom} dihapus.`
+            ? 'Semua pemain + log event dihapus.'
+            : 'Semua room dihapus.'
       );
-      setKodeRoom('');
     } finally {
       setSibuk(false);
     }
@@ -204,7 +199,7 @@ export default function AdminPage() {
               <div className="admin-kartu admin-kartu-danger">
                 <span className="admin-badge admin-badge-danger">ZONA KELOLA</span>
                 <p className="admin-danger-ket">
-                  Pakai kode room yang sama di atas. Butuh konfirmasi sebelum dijalankan.
+                  Aksi langsung tanpa kode room. Butuh konfirmasi sebelum dijalankan.
                 </p>
                 <div className="admin-stack">
                   <button
@@ -212,7 +207,7 @@ export default function AdminPage() {
                     onClick={() => resetRoom('score')}
                     disabled={sibuk}
                   >
-                    ↩ Reset skor (user tetap)
+                    ↩ Reset skor semua pemain
                   </button>
                   <button
                     className="hw-btn hw-btn-pil"
@@ -226,13 +221,13 @@ export default function AdminPage() {
                     onClick={() => resetRoom('room')}
                     disabled={sibuk}
                   >
-                    ☠ Hapus room total
+                    ☠ Hapus semua room
                   </button>
                 </div>
-              </div>
-            </div>
+</div>
+          </div>
 
-            <a className="admin-back" href="/">
+          <a className="admin-back" href="/">
               ← Kembali ke halaman pemain
             </a>
           </>

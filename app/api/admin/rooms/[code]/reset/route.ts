@@ -39,6 +39,10 @@ export async function POST(
   } else if (parsed.data.action === 'clear') {
     const { error: e } = await sb.from('players').delete().eq('room_code', roomCode);
     error = e;
+    if (!error) {
+      const { error: e2 } = await sb.from('room_events').delete().eq('room_code', roomCode);
+      error = e2;
+    }
   } else {
     const { error: e } = await sb
       .from('room_events')
